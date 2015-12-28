@@ -1,0 +1,29 @@
+api:
+  build: ./api
+  environment:
+    - NODE_ENV=production
+  links:
+    - rethinkdb
+    - elasticsearch
+    - redis
+rethinkdb:
+  image: rethinkdb
+elasticsearch:
+  image: elasticsearch
+logstash:
+  image: nukr/logstash
+  links:
+    - rethinkdb
+    - elasticsearch
+redis:
+  image: redis
+nginx:
+  image: nukr/nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  links:
+    - api
+    - graphiql
+graphiql:
+  image: nukr/graphiql

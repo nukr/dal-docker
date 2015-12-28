@@ -1,0 +1,33 @@
+api:
+  build: ./api
+  environment:
+    - NODE_ENV=testing
+  volumes:
+    - "./api/src:/opt/app/src"
+  links:
+    - rethinkdb
+    - elasticsearch
+    - redis
+rethinkdb:
+  image: rethinkdb
+  ports:
+    - "8080:8080"
+elasticsearch:
+  image: elasticsearch
+redis:
+  image: redis
+logstash:
+  image: nukr/logstash
+  links:
+    - rethinkdb
+    - elasticsearch
+nginx:
+  image: nukr/nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  links:
+    - api
+    - graphiql
+graphiql:
+  image: nukr/graphiql
