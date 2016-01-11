@@ -1,13 +1,16 @@
 api:
-  build: ./api
+  build: ../api
   environment:
     - NODE_ENV=development
+    - JWT_SECRET=@@@@@@@@@@@
   volumes:
-    - "./api/src:/opt/app/src"
+    - "../api/src:/opt/app/src"
   links:
     - rethinkdb
     - elasticsearch
     - redis
+  ports:
+    - "80:12345"
 rethinkdb:
   image: rethinkdb
   ports:
@@ -16,18 +19,10 @@ elasticsearch:
   image: elasticsearch
 redis:
   image: redis
+  ports:
+    - "6379:6379"
 logstash:
   image: nukr/logstash
   links:
     - rethinkdb
     - elasticsearch
-nginx:
-  image: nukr/nginx
-  ports:
-    - "80:80"
-    - "443:443"
-  links:
-    - api
-    - graphiql
-graphiql:
-  image: nukr/graphiql
