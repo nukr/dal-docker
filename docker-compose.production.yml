@@ -1,29 +1,22 @@
 api:
-  build: ./api
+  image: asia.gcr.io/instant-matter-785/dal:latest
   environment:
     - NODE_ENV=production
+    - JWT_SECRET=@@@@@@@@@@@
   links:
     - rethinkdb
     - elasticsearch
     - redis
+  ports:
+    - "80:12345"
 rethinkdb:
   image: rethinkdb
 elasticsearch:
   image: elasticsearch
-logstash:
-  image: nukr/logstash
+redis:
+  image: redis
+input:
+  image: asia.gcr.io/instant-matter-785/input:latest
   links:
     - rethinkdb
     - elasticsearch
-redis:
-  image: redis
-nginx:
-  image: nukr/nginx
-  ports:
-    - "80:80"
-    - "443:443"
-  links:
-    - api
-    - graphiql
-graphiql:
-  image: nukr/graphiql
