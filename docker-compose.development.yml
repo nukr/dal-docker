@@ -29,6 +29,7 @@ services:
       - pubsub
     ports:
       - "12345:12345"
+      - "23456:23456"
   rethinkdb:
     image: rethinkdb
     ports:
@@ -60,14 +61,6 @@ services:
       - SECRET=1234
     ports:
       - "9999:8888"
-  appdash_server:
-    image: asia.gcr.io/instant-matter-785/appdash_server:0.1.1
-    environment:
-      - APPDASH_PORT=8700
-      - COLLECTOR_PORT=8701
-    ports:
-      - "8700:8700"
-      - "8701:8701"
   input:
     # command: go run main.go job.go worker.go
     # build:
@@ -93,3 +86,49 @@ services:
     command: gcloud beta emulators pubsub start --host-port 0.0.0.0:8344
     ports:
       - "8344:8344"
+  storage:
+    image: openzipkin/zipkin-mysql:1.19.0
+    container_name: mysql
+
+  # The zipkin process services the UI, and also exposes a POST endpoint that
+  # instrumentation can send trace data to. Scribe is enabled by default.
+  zipkin:
+    image: openzipkin/zipkin:1.19.0
+    container_name: zipkin
+    # Environment settings are defined here https://github.com/openzipkin/zipkin/tree/1.19.0/zipkin-server#environment-variables
+    environment:
+      - STORAGE_TYPE=mysql
+      # Point the zipkin at the storage backend
+      - MYSQL_HOST=mysql
+      # Uncomment to disable scribe
+      # - SCRIBE_ENABLED=false
+      # Uncomment to enable self-tracing
+      # - SELF_TRACING_ENABLED=true
+      # Uncomment to enable debug logging
+      # - JAVA_OPTS=-Dlogging.level.zipkin=DEBUG
+    ports:
+      # Listen port for the Scribe transport
+      - 9410:9410
+      # Port used for the Zipkin UI and HTTP Api
+      - 9411:9411
+    depends_on:
+      - storage
+
+  # Adds a cron to process spans since midnight every hour, and all spans each day
+  # This data is served by http://192.168.99.100:8080/dependency
+  #
+  # For more details, see https://github.com/openzipkin/docker-zipkin-dependencies
+  dependencies:
+    image: openzipkin/zipkin-dependencies
+    container_name: dependencies
+    entrypoint: crond -f
+    environment:
+      - STORAGE_TYPE=mysql
+      - MYSQL_HOST=mysql
+      # Add the baked-in username and password for the zipkin-mysql image
+      - MYSQL_USER=zipkin
+      - MYSQL_PASS=zipkin
+      # Uncomment to adjust memory used by the dependencies job
+      # - JAVA_OPTS=-verbose:gc -Xms1G -Xmx1G
+    depends_on:
+      - storage
