@@ -2,7 +2,7 @@ version: "2"
 services:
   api:
     build:
-      context: ../old-api
+      context: ../../old-dal
       dockerfile: Dockerfile
     command: nodemon -x "babel-node src/server"
     environment:
@@ -19,8 +19,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/credentials/credentials.json
       - PUBSUB_EMULATOR_HOST=pubsub:8344
     volumes:
-      - "../old-api/src:/opt/app/src"
-      - "./credentials.json:/credentials/credentials.json"
+      - "../../old-dal/src:/opt/app/src"
     links:
       - rethinkdb
       - elasticsearch
@@ -78,9 +77,6 @@ services:
       - SERVER_SUBSCRIPTION=input_es_local
       - GOOGLE_APPLICATION_CREDENTIALS=/credentials/credentials.json
       - PUBSUB_EMULATOR_HOST=pubsub:8344
-    volumes:
-      - "/Users/nukr/workspace/gocode/src/github.com/nukr/input:/go/src/github.com/nukr/input"
-      - "./credentials.json:/credentials/credentials.json"
   pubsub:
     image: google/cloud-sdk:latest
     command: gcloud beta emulators pubsub start --host-port 0.0.0.0:8344
