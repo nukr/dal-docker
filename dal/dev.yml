@@ -30,7 +30,7 @@ services:
       - "12345:12345"
       - "23456:23456"
   rethinkdb:
-    image: rethinkdb
+    image: rethinkdb:2.3.5
     ports:
       - "8080:8080"
       - "28015:28015"
@@ -39,7 +39,7 @@ services:
     ports:
       - "9200:9200"
   redis:
-    image: redis
+    image: redis:3.2.6-alpine
     ports:
       - "6379:6379"
   initial:
