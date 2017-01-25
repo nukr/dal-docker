@@ -34,6 +34,17 @@ services:
     ports:
       - "8080:8080"
       - "28015:28015"
+  influxdb:
+    image: influxdb:1.2.0-alpine
+    ports:
+      - "8086:8086"
+      - "8083:8083"
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    ports:
+      - "3000:3000"
   elasticsearch:
     image: asia.gcr.io/instant-matter-785/elasticsearch_ik:2.3.5
     ports:
